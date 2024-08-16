@@ -27,6 +27,7 @@ import {
 } from "three";
 import { Geometry } from "three-stdlib";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import useDeviceMotion from "~/lib/use-device-motion";
 
 function toConvexProps(
   bufferGeometry: BufferGeometry,
@@ -150,42 +151,52 @@ function Lights() {
 }
 
 export default function Page() {
+  const motionData = useDeviceMotion();
   return (
-    <Canvas
-      shadows
-      dpr={[1, 2]}
-      gl={{ alpha: false }}
-      camera={{ position: [0, 10, 0], fov: 10 }}
-    >
-      <color attach="background" args={["lightblue"]} />
-      <OrbitControls />
-      <Lights />
-      <Physics>
-        <Bounds fit clip observe margin={1}>
-          <Plane
-            position={[0, -4.5, 0]}
-            args={[9, 16, 1]}
-            rotation={[-Math.PI / 2, 0, 0]}
-          />
-          <Plane
-            position={[-4.5, 0, 0]}
-            args={[16, 10, 1]}
-            rotation={[0, Math.PI / 2, 0]}
-          />
-          <Plane
-            position={[4.5, 0, 0]}
-            args={[16, 10, 1]}
-            rotation={[0, -Math.PI / 2, 0]}
-          />
-          <Plane position={[0, 0, -8]} args={[9, 10, 1]} rotation={[0, 0, 0]} />
-          <Plane
-            position={[0, 0, 8]}
-            args={[9, 10, 1]}
-            rotation={[0, Math.PI, 0]}
-          />
-          <D20 position={[0, 10, 0]} />
-        </Bounds>
-      </Physics>
-    </Canvas>
+    <>
+      <Canvas
+        shadows
+        dpr={[1, 2]}
+        gl={{ alpha: false }}
+        camera={{ position: [0, 10, 0], fov: 10 }}
+      >
+        <color attach="background" args={["lightblue"]} />
+        <OrbitControls />
+        <Lights />
+        <Physics>
+          <Bounds fit clip observe margin={1}>
+            <Plane
+              position={[0, -4.5, 0]}
+              args={[9, 16, 1]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            />
+            <Plane
+              position={[-4.5, 0, 0]}
+              args={[16, 10, 1]}
+              rotation={[0, Math.PI / 2, 0]}
+            />
+            <Plane
+              position={[4.5, 0, 0]}
+              args={[16, 10, 1]}
+              rotation={[0, -Math.PI / 2, 0]}
+            />
+            <Plane
+              position={[0, 0, -8]}
+              args={[9, 10, 1]}
+              rotation={[0, 0, 0]}
+            />
+            <Plane
+              position={[0, 0, 8]}
+              args={[9, 10, 1]}
+              rotation={[0, Math.PI, 0]}
+            />
+            <D20 position={[0, 10, 0]} />
+          </Bounds>
+        </Physics>
+      </Canvas>
+      <div className="absolute left-2 top-2">
+        <pre>{JSON.stringify(motionData, null, 2)}</pre>
+      </div>
+    </>
   );
 }
