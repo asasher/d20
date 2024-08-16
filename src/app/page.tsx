@@ -6,7 +6,6 @@ import {
   type ConvexPolyhedronProps,
   useConvexPolyhedron,
   type Triplet,
-  Debug,
   type BoxProps,
   useBox,
 } from "@react-three/cannon";
@@ -16,6 +15,7 @@ import {
   OrbitControls,
   Bounds,
   Box,
+  useBounds,
 } from "@react-three/drei";
 import {
   type BufferGeometry,
@@ -40,6 +40,7 @@ function toConvexProps(
 }
 
 function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
+  const bounds = useBounds();
   const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
   const args = useMemo(() => toConvexProps(geometry), [geometry]);
   const [ref, api] = useConvexPolyhedron(
@@ -69,6 +70,8 @@ function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
 
     const handleShake = () => {
       rollDice();
+      if (!ref.current) return;
+      bounds.refresh(ref.current).clip().fit();
     };
 
     if (window.DeviceMotionEvent) {
@@ -80,7 +83,7 @@ function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
         window.removeEventListener("devicemotion", handleShake);
       }
     };
-  }, [rollDice, api]);
+  }, [rollDice, api, bounds, ref]);
 
   return (
     <Icosahedron
