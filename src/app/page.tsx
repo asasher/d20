@@ -1,37 +1,191 @@
-import Link from "next/link";
+"use client";
 
-export default function HomePage() {
+import { Canvas } from "@react-three/fiber";
+import {
+  Physics,
+  type ConvexPolyhedronProps,
+  useConvexPolyhedron,
+  type Triplet,
+  Debug,
+  type BoxProps,
+  useBox,
+} from "@react-three/cannon";
+import {
+  Text,
+  Icosahedron,
+  OrbitControls,
+  Bounds,
+  Box,
+} from "@react-three/drei";
+import {
+  type BufferGeometry,
+  Euler,
+  IcosahedronGeometry,
+  type Mesh,
+  Quaternion,
+  Vector3,
+} from "three";
+import { Geometry } from "three-stdlib";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+
+function toConvexProps(
+  bufferGeometry: BufferGeometry,
+): [vertices: Triplet[], faces: Triplet[]] {
+  const geo = new Geometry().fromBufferGeometry(bufferGeometry);
+  geo.mergeVertices();
+  const vertices: Triplet[] = geo.vertices.map((v) => [v.x, v.y, v.z]);
+  const faces: Triplet[] = geo.faces.map((f) => [f.a, f.b, f.c]);
+  return [vertices, faces];
+}
+
+function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
+  const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
+  const args = useMemo(() => toConvexProps(geometry), [geometry]);
+  const [ref, api] = useConvexPolyhedron(
+    () => ({ args, mass: 1, position, rotation, ...rest }),
+    useRef<Mesh>(null),
+  );
+
+  const rollDice = useCallback(() => {
+    api.velocity.set(
+      (Math.random() - 0.5) * 10,
+      Math.random() * 5 + 3,
+      (Math.random() - 0.5) * 10,
+    );
+    api.angularVelocity.set(
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+    );
+  }, [api]);
+
+  useEffect(() => {
+    api.angularVelocity.set(
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+    );
+
+    const handleShake = () => {
+      rollDice();
+    };
+
+    if (window.DeviceMotionEvent) {
+      window.addEventListener("devicemotion", handleShake);
+    }
+
+    return () => {
+      if (window.DeviceMotionEvent) {
+        window.removeEventListener("devicemotion", handleShake);
+      }
+    };
+  }, [rollDice, api]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
+    <Icosahedron
+      onClick={rollDice}
+      receiveShadow
+      castShadow
+      {...{ geometry, position, ref, rotation }}
+    >
+      <meshStandardMaterial color="orange" />
+      {args[1].map((face, index) => {
+        const [a, b, c] = face.map((i) => new Vector3(...args[0][i]!));
+        const center = new Vector3().addVectors(a!, b!).add(c!).divideScalar(3);
+        const normal = new Vector3()
+          .subVectors(b!, a!)
+          .cross(new Vector3().subVectors(c!, a!))
+          .normalize();
+
+        // Offset the text slightly along the normal
+        const offset = normal.clone().multiplyScalar(0.05); // Adjust the scalar value as needed
+        const position = center.clone().add(offset);
+
+        const quaternion = new Quaternion().setFromUnitVectors(
+          new Vector3(0, 0, 1),
+          normal,
+        );
+        const rotation = new Euler().setFromQuaternion(quaternion);
+
+        return (
+          <Text
+            key={index}
+            position={position}
+            fontSize={0.3}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+            rotation={rotation}
+            quaternion={quaternion}
           >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
-        </div>
-      </div>
-    </main>
+            {index + 1 === 6 ? "6." : index + 1 === 9 ? "9." : index + 1}
+          </Text>
+        );
+      })}
+    </Icosahedron>
+  );
+}
+
+function Plane({ position, rotation, args, ...rest }: Partial<BoxProps>) {
+  const [ref] = useBox<Mesh>(() => ({
+    position,
+    rotation,
+    args,
+    ...rest,
+  }));
+  return (
+    <Box receiveShadow {...{ position, ref, rotation, args }}>
+      <shadowMaterial color={"#171717"} opacity={0.4} />
+    </Box>
+  );
+}
+
+function Lights() {
+  return (
+    <>
+      <ambientLight />
+      <directionalLight position={[0, 5, 0]} castShadow />
+    </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Canvas
+      shadows
+      dpr={[1, 2]}
+      gl={{ alpha: false }}
+      camera={{ position: [0, 10, 0], fov: 10 }}
+    >
+      <color attach="background" args={["lightblue"]} />
+      <OrbitControls />
+      <Lights />
+      <Physics>
+        <Bounds fit clip observe margin={1}>
+          <Plane
+            position={[0, -4.5, 0]}
+            args={[9, 16, 1]}
+            rotation={[-Math.PI / 2, 0, 0]}
+          />
+          <Plane
+            position={[-4.5, 0, 0]}
+            args={[16, 10, 1]}
+            rotation={[0, Math.PI / 2, 0]}
+          />
+          <Plane
+            position={[4.5, 0, 0]}
+            args={[16, 10, 1]}
+            rotation={[0, -Math.PI / 2, 0]}
+          />
+          <Plane position={[0, 0, -8]} args={[9, 10, 1]} rotation={[0, 0, 0]} />
+          <Plane
+            position={[0, 0, 8]}
+            args={[9, 10, 1]}
+            rotation={[0, Math.PI, 0]}
+          />
+          <D20 position={[0, 10, 0]} />
+        </Bounds>
+      </Physics>
+    </Canvas>
   );
 }
