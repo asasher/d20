@@ -26,7 +26,7 @@ function useDeviceMotion() {
     accelerationIncludingGravity: { x: null, y: null, z: null },
     rotationRate: { alpha: null, beta: null, gamma: null },
     interval: 0,
-    isSecureContext: false,
+    isSecureContext: window.isSecureContext ?? false,
   });
 
   useEffect(() => {
