@@ -17,6 +17,7 @@ type MotionData = {
     gamma: number | null;
   };
   interval: number;
+  isSecureContext: boolean;
 };
 
 function useDeviceMotion() {
@@ -25,6 +26,7 @@ function useDeviceMotion() {
     accelerationIncludingGravity: { x: null, y: null, z: null },
     rotationRate: { alpha: null, beta: null, gamma: null },
     interval: 0,
+    isSecureContext: false,
   });
 
   useEffect(() => {
@@ -36,6 +38,7 @@ function useDeviceMotion() {
           prev.accelerationIncludingGravity,
         rotationRate: event.rotationRate ?? prev.rotationRate,
         interval: event.interval ?? prev.interval,
+        isSecureContext: window.isSecureContext ?? prev.isSecureContext,
       }));
     };
 
