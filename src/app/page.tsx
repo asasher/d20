@@ -160,7 +160,7 @@ export default function Page() {
         <color attach="background" args={["lightblue"]} />
         <OrbitControls />
         <Lights />
-        <Physics gravity={[accX, -accZ, accY]}>
+        <Physics gravity={[accX, -accZ, -accY]}>
           <Bounds fit clip observe margin={1}>
             <Plane
               position={[0, -4.5, 0]}
