@@ -46,26 +46,26 @@ function D20({
   motionData,
   ...rest
 }: Partial<ConvexPolyhedronProps> & { motionData: MotionData }) {
-  const bounds = useBounds();
+  const mass = 1;
   const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
   const args = useMemo(() => toConvexProps(geometry), [geometry]);
   const [ref, api] = useConvexPolyhedron(
-    () => ({ args, mass: 1, position, rotation, ...rest }),
+    () => ({ args, mass, position, rotation, ...rest }),
     useRef<Mesh>(null),
   );
 
   const rollDice = useCallback(() => {
     api.velocity.set(
-      (motionData.acceleration.x ?? Math.random() - 0.5) * 10,
-      (motionData.acceleration.y ?? Math.random()) * 5 + 3,
-      (motionData.acceleration.z ?? Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+      Math.random() * 5 + 3,
+      (Math.random() - 0.5) * 10,
     );
     api.angularVelocity.set(
-      (motionData.rotationRate.alpha ?? Math.random() - 0.5) * 10,
-      (motionData.rotationRate.beta ?? Math.random() - 0.5) * 10,
-      (motionData.rotationRate.gamma ?? Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
     );
-  }, [api, motionData]);
+  }, [api]);
 
   useEffect(() => {
     api.angularVelocity.set(
@@ -73,23 +73,18 @@ function D20({
       (Math.random() - 0.5) * 10,
       (Math.random() - 0.5) * 10,
     );
+  }, [api]);
 
-    const handleShake = () => {
-      rollDice();
-      if (!ref.current) return;
-      bounds.refresh(ref.current).clip().fit();
-    };
-
-    if (window.DeviceMotionEvent) {
-      window.addEventListener("devicemotion", handleShake);
-    }
-
-    return () => {
-      if (window.DeviceMotionEvent) {
-        window.removeEventListener("devicemotion", handleShake);
-      }
-    };
-  }, [rollDice, api, bounds, ref]);
+  useEffect(() => {
+    if (!position) return;
+    const accX = motionData.accelerationIncludingGravity.x ?? 0;
+    const accY = motionData.accelerationIncludingGravity.y ?? 0;
+    const accZ = motionData.accelerationIncludingGravity.z ?? 0;
+    const forceX = mass * accX;
+    const forceY = mass * accY;
+    const forceZ = mass * accZ;
+    api.applyLocalForce([forceX, forceY, forceZ], position);
+  }, [api, mass, position, motionData]);
 
   return (
     <Icosahedron
