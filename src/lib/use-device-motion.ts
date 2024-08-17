@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-type MotionData = {
+export type MotionData = {
   acceleration: {
     x: number | null;
     y: number | null;

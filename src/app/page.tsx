@@ -27,7 +27,7 @@ import {
 } from "three";
 import { Geometry } from "three-stdlib";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import useDeviceMotion from "~/lib/use-device-motion";
+import useDeviceMotion, { MotionData } from "~/lib/use-device-motion";
 import { Button } from "~/components/ui/button";
 
 function toConvexProps(
@@ -40,7 +40,12 @@ function toConvexProps(
   return [vertices, faces];
 }
 
-function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
+function D20({
+  position,
+  rotation,
+  motionData,
+  ...rest
+}: Partial<ConvexPolyhedronProps> & { motionData: MotionData }) {
   const bounds = useBounds();
   const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
   const args = useMemo(() => toConvexProps(geometry), [geometry]);
@@ -51,16 +56,16 @@ function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
 
   const rollDice = useCallback(() => {
     api.velocity.set(
-      (Math.random() - 0.5) * 10,
-      Math.random() * 5 + 3,
-      (Math.random() - 0.5) * 10,
+      (motionData.acceleration.x ?? Math.random() - 0.5) * 10,
+      (motionData.acceleration.y ?? Math.random()) * 5 + 3,
+      (motionData.acceleration.z ?? Math.random() - 0.5) * 10,
     );
     api.angularVelocity.set(
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
+      (motionData.rotationRate.alpha ?? Math.random() - 0.5) * 10,
+      (motionData.rotationRate.beta ?? Math.random() - 0.5) * 10,
+      (motionData.rotationRate.gamma ?? Math.random() - 0.5) * 10,
     );
-  }, [api]);
+  }, [api, motionData]);
 
   useEffect(() => {
     api.angularVelocity.set(
@@ -194,7 +199,7 @@ export default function Page() {
               args={[9, 10, 1]}
               rotation={[0, Math.PI, 0]}
             />
-            <D20 position={[0, 10, 0]} />
+            <D20 position={[0, 10, 0]} motionData={motionData} />
           </Bounds>
         </Physics>
       </Canvas>
