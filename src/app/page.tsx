@@ -202,17 +202,15 @@ export default function Page() {
   const { requestPermission, motionData } = useDeviceMotion();
   const aspectRatio = useAspectRatio(9 / 16);
 
-  const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 3);
-  const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3);
-  const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? -9.81, 3);
-
-  const xyMult = 20;
-  const zMult = 5;
-  const gravity: [number, number, number] = [
-    xyMult * accX,
-    xyMult * accY,
-    zMult * accZ,
-  ];
+  const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 3) * 20;
+  const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3) * 20;
+  const accZ = toFixed(
+    (motionData.acceleration.z ?? 0) <= 0
+      ? -9.81
+      : (motionData.acceleration.z ?? 0) * 10,
+    3,
+  );
+  const gravity: [number, number, number] = [accX, accY, accZ];
 
   // ar =  w / h
   // h = w / ar
