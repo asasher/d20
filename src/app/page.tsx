@@ -200,7 +200,7 @@ export default function Page() {
     accZ = 9.81;
   }
 
-  const mult = 3;
+  const mult = 10;
   const gravity: [number, number, number] = [
     mult * accX,
     -mult * accY,
