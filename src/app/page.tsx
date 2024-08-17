@@ -217,7 +217,7 @@ export default function Page() {
         <Lights />
         <Physics gravity={gravity}>
           {/* <Debug scale={1.1}> */}
-          <Bounds fit clip observe margin={0.5}>
+          <Bounds fit clip observe margin={1}>
             <Tray w={9} h={16} d={10} />
             <D20 radius={1} position={[0, 0, 0]} />
           </Bounds>
