@@ -157,11 +157,12 @@ function Tray({ w, h, d }: { w: number; h: number; d: number }) {
       rotation: [0, 0, 0],
       args: [w, h, wallThickness],
     }, // Bottom
-    // {
-    //   position: [0, 0, d / 2],
-    //   rotation: [0, 0, 0],
-    //   args: [w, h, wallThickness],
-    // }, // Top
+    {
+      key: "top",
+      position: [0, 0, d / 2],
+      rotation: [0, 0, 0],
+      args: [w, h, wallThickness],
+    }, // Top
     {
       key: "left",
       position: [-(w / 2), 0, 0],
