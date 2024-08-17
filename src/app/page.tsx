@@ -202,7 +202,7 @@ export default function Page() {
 
   const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 3);
   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3);
-  let accZ = toFixed(motionData.accelerationIncludingGravity.z ?? -9.81, 3);
+  const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? -9.81, 3);
 
   const mult = 10;
   const gravity: [number, number, number] = [
