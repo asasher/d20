@@ -28,6 +28,7 @@ import {
 import { Geometry } from "three-stdlib";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import useDeviceMotion from "~/lib/use-device-motion";
+import { Button } from "~/components/ui/button";
 
 function toConvexProps(
   bufferGeometry: BufferGeometry,
@@ -154,7 +155,7 @@ function Lights() {
 }
 
 export default function Page() {
-  const motionData = useDeviceMotion();
+  const { requestPermission, motionData } = useDeviceMotion();
   return (
     <>
       <Canvas
@@ -198,6 +199,7 @@ export default function Page() {
         </Physics>
       </Canvas>
       <div className="absolute left-2 top-2">
+        <Button onClick={requestPermission}>Request Permission</Button>
         <pre>{JSON.stringify(motionData, null, 2)}</pre>
       </div>
     </>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 type MotionData = {
   acceleration: {
@@ -26,11 +26,37 @@ function useDeviceMotion() {
     accelerationIncludingGravity: { x: null, y: null, z: null },
     rotationRate: { alpha: null, beta: null, gamma: null },
     interval: 0,
-    isSecureContext: window && (window.isSecureContext ?? false),
+    isSecureContext: false,
   });
+  const [permissionState, setPermissionState] = useState<string>();
+
+  const requestPermission = useCallback(() => {
+    if (
+      "requestPermission" in DeviceMotionEvent &&
+      typeof DeviceMotionEvent.requestPermission === "function"
+    ) {
+      console.log("Requesting permission.");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      DeviceMotionEvent.requestPermission()
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .then((permissionState: string) => {
+          if (permissionState === "granted") {
+            setPermissionState(permissionState);
+          }
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .catch((error: unknown) => {
+          console.error(error);
+        });
+    } else {
+      console.log("No need to request permission.");
+      setPermissionState("granted");
+    }
+  }, []);
 
   useEffect(() => {
     const handleMotion = (event: DeviceMotionEvent) => {
+      console.log("Received device motion event.");
       setMotionData((prev) => ({
         acceleration: event.acceleration ?? prev.acceleration,
         accelerationIncludingGravity:
@@ -43,30 +69,17 @@ function useDeviceMotion() {
       }));
     };
 
-    if (
-      "requestPermission" in DeviceMotionEvent &&
-      typeof DeviceMotionEvent.requestPermission === "function"
-    ) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      DeviceMotionEvent.requestPermission()
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        .then((permissionState: string) => {
-          if (permissionState === "granted") {
-            window.addEventListener("devicemotion", handleMotion);
-          }
-        })
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        .catch((error: unknown) => {
-          console.error(error);
-        });
+    if (permissionState === "granted") {
+      console.log("Permission state is granted. Setting up event listener.");
+      window.addEventListener("devicemotion", handleMotion);
+
+      return () => {
+        window.removeEventListener("devicemotion", handleMotion);
+      };
     }
+  }, [permissionState]);
 
-    return () => {
-      window.removeEventListener("devicemotion", handleMotion);
-    };
-  }, []);
-
-  return motionData;
+  return { requestPermission, motionData };
 }
 
 export default useDeviceMotion;
