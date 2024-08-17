@@ -212,10 +212,6 @@ export default function Page() {
   );
   const gravity: [number, number, number] = [accX, accY, accZ];
 
-  // ar =  w / h
-  // h = w / ar
-  console.log(gravity);
-
   const w = 9;
   const h = w / aspectRatio;
   const d = 20;
@@ -224,6 +220,7 @@ export default function Page() {
   return (
     <>
       <Canvas
+        onClick={requestPermission}
         shadows
         camera={{
           position: [0, 0, d * 5],
@@ -242,10 +239,6 @@ export default function Page() {
           {/* </Debug> */}
         </Physics>
       </Canvas>
-      <div className="absolute left-2 top-2">
-        <Button onClick={requestPermission}>Request Permission</Button>
-        {/* <pre>{JSON.stringify(motionData, null, 2)}</pre> */}
-      </div>
     </>
   );
 }
