@@ -206,11 +206,12 @@ export default function Page() {
   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3);
   const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? -9.81, 3);
 
-  const mult = 20;
+  const xyMult = 20;
+  const zMult = 5;
   const gravity: [number, number, number] = [
-    mult * accX,
-    mult * accY,
-    mult * accZ,
+    xyMult * accX,
+    xyMult * accY,
+    zMult * accZ,
   ];
 
   // ar =  w / h
