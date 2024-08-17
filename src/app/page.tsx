@@ -142,9 +142,9 @@ function Lights() {
 export default function Page() {
   const { requestPermission, motionData } = useDeviceMotion();
 
-  const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 2);
-  const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 2);
-  let accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 2);
+  const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 3);
+  const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3);
+  let accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 3);
   if (accZ <= 0) {
     accZ = 9.81;
   }
