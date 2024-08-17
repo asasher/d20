@@ -146,11 +146,13 @@ function Lights() {
 function Tray({ w, h, d }: { w: number; h: number; d: number }) {
   const wallThickness = 0.1;
   const measurements: {
+    key: string;
     position: Triplet;
     rotation: Triplet;
     args: Triplet;
   }[] = [
     {
+      key: "floor",
       position: [0, 0, -(d / 2)],
       rotation: [0, 0, 0],
       args: [w, h, wallThickness],
@@ -161,21 +163,25 @@ function Tray({ w, h, d }: { w: number; h: number; d: number }) {
     //   args: [w, h, wallThickness],
     // }, // Top
     {
+      key: "left",
       position: [-(w / 2), 0, 0],
       rotation: [0, Math.PI / 2, 0],
       args: [d, h, wallThickness],
     }, // Left
     {
+      key: "right",
       position: [w / 2, 0, 0],
       rotation: [0, Math.PI / 2, 0],
       args: [d, h, wallThickness],
     }, // Right
     {
+      key: "up",
       position: [0, -(h / 2), 0],
       rotation: [Math.PI / 2, 0, 0],
       args: [w, d, wallThickness],
     }, // Up
     {
+      key: "down",
       position: [0, h / 2, 0],
       rotation: [Math.PI / 2, 0, 0],
       args: [w, d, wallThickness],
@@ -183,8 +189,8 @@ function Tray({ w, h, d }: { w: number; h: number; d: number }) {
   ];
   return (
     <>
-      {measurements.map(({ position, rotation, args }) => (
-        <Side position={position} rotation={rotation} args={args} />
+      {measurements.map(({ key, position, rotation, args }) => (
+        <Side key={key} position={position} rotation={rotation} args={args} />
       ))}
     </>
   );
