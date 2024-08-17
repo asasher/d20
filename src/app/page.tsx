@@ -204,7 +204,7 @@ export default function Page() {
   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3);
   const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? -9.81, 3);
 
-  const mult = 10;
+  const mult = 20;
   const gravity: [number, number, number] = [
     mult * accX,
     mult * accY,
@@ -222,8 +222,8 @@ export default function Page() {
         <Physics gravity={gravity}>
           {/* <Debug scale={1.1}> */}
           <Bounds fit clip observe margin={1}>
-            <Tray w={9} h={16} d={10} />
-            <D20 radius={1} position={[0, 0, 0]} />
+            <Tray w={9} h={16} d={20} />
+            <D20 radius={2} position={[0, 0, 0]} />
           </Bounds>
           {/* </Debug> */}
         </Physics>
