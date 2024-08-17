@@ -10,7 +10,13 @@ import {
   useBox,
   Debug,
 } from "@react-three/cannon";
-import { Text, OrbitControls, Bounds, Box } from "@react-three/drei";
+import {
+  Text,
+  OrbitControls,
+  Bounds,
+  Box,
+  OrthographicCamera,
+} from "@react-three/drei";
 import {
   type BufferGeometry,
   Euler,
@@ -79,7 +85,6 @@ function D20({
       onClick={rollDice}
       receiveShadow
       castShadow
-      // args={[radius, 0]}
       {...{ geometry, position, ref, rotation }}
     >
       <meshStandardMaterial color="orange" />
@@ -130,17 +135,7 @@ function Side({ position, rotation, args, ...rest }: Partial<BoxProps>) {
   return (
     <Box receiveShadow {...{ position, ref, rotation, args }}>
       <shadowMaterial color={"#171717"} opacity={0.4} />
-      {/* <meshStandardMaterial color="red" /> */}
     </Box>
-  );
-}
-
-function Lights() {
-  return (
-    <>
-      <ambientLight />
-      <directionalLight position={[0, 0, 5]} castShadow />
-    </>
   );
 }
 
@@ -219,24 +214,22 @@ export default function Page() {
 
   return (
     <>
-      <Canvas
-        onClick={requestPermission}
-        shadows
-        camera={{
-          position: [0, 0, d * 5],
-          fov: 10,
-        }}
-      >
+      <Canvas onClick={requestPermission} shadows>
         <color attach="background" args={["lightblue"]} />
+        <OrthographicCamera makeDefault zoom={100} position={[0, 0, d]} />
         <OrbitControls />
-        <Lights />
+        <ambientLight castShadow />
+        <directionalLight position={[0, h / 2, d]} castShadow>
+          <orthographicCamera
+            attach="shadow-camera"
+            args={[-10, 10, 10, -10]}
+          />
+        </directionalLight>
         <Physics gravity={gravity}>
-          {/* <Debug scale={1.1}> */}
-          {/* <Bounds fit clip observe margin={1}> */}
-          <Tray w={w} h={h} d={d} />
-          <D20 radius={radius} position={[0, 0, 0]} />
-          {/* </Bounds> */}
-          {/* </Debug> */}
+          <Bounds fit clip observe margin={1}>
+            <Tray w={w} h={h} d={d} />
+            <D20 radius={radius} position={[0, 0, 0]} />
+          </Bounds>
         </Physics>
       </Canvas>
     </>
