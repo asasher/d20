@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import useDeviceMotion from "~/lib/use-device-motion";
 import { Button } from "~/components/ui/button";
 import { toFixed } from "~/lib/utils";
+import useAspectRatio from "~/lib/use-aspect-ratio";
 
 function toConvexProps(
   bufferGeometry: BufferGeometry,
@@ -199,6 +200,7 @@ function Tray({ w, h, d }: { w: number; h: number; d: number }) {
 
 export default function Page() {
   const { requestPermission, motionData } = useDeviceMotion();
+  const aspectRatio = useAspectRatio(9 / 16);
 
   const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 3);
   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3);
@@ -211,20 +213,33 @@ export default function Page() {
     mult * accZ,
   ];
 
+  // ar =  w / h
+  // h = w / ar
   console.log(gravity);
+
+  const w = 9;
+  const h = w / aspectRatio;
+  const d = 20;
+  const radius = Math.floor(w / 4);
 
   return (
     <>
-      <Canvas shadows camera={{ position: [0, 0, 2], fov: 20 }}>
+      <Canvas
+        shadows
+        camera={{
+          position: [0, 0, d * 5],
+          fov: 10,
+        }}
+      >
         <color attach="background" args={["lightblue"]} />
         <OrbitControls />
         <Lights />
         <Physics gravity={gravity}>
           {/* <Debug scale={1.1}> */}
-          <Bounds fit clip observe margin={1}>
-            <Tray w={9} h={16} d={20} />
-            <D20 radius={2} position={[0, 0, 0]} />
-          </Bounds>
+          {/* <Bounds fit clip observe margin={1}> */}
+          <Tray w={w} h={h} d={d} />
+          <D20 radius={radius} position={[0, 0, 0]} />
+          {/* </Bounds> */}
           {/* </Debug> */}
         </Physics>
       </Canvas>
