@@ -79,18 +79,12 @@ function D20({
   useEffect(() => {
     if (!position) return;
     const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 2);
-    const accY = toFixed(
-      Math.round(motionData.accelerationIncludingGravity.y ?? 0),
-      2,
-    );
-    const accZ = toFixed(
-      Math.round(motionData.accelerationIncludingGravity.z ?? 0),
-      2,
-    );
+    const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 2);
+    const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 2);
     const forceX = mass * accX;
     const forceY = mass * accY;
     const forceZ = mass * accZ;
-    api.applyLocalForce([forceX, forceY, forceZ], position);
+    api.applyLocalForce([forceX, forceZ, -forceY], position);
   }, [api, mass, position, motionData]);
 
   return (
