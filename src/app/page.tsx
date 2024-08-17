@@ -193,7 +193,7 @@ export default function Page() {
       </Canvas>
       <div className="absolute left-2 top-2">
         <Button onClick={requestPermission}>Request Permission</Button>
-        <pre>{JSON.stringify(motionData, null, 2)}</pre>
+        {/* <pre>{JSON.stringify(motionData, null, 2)}</pre> */}
       </div>
     </>
   );
