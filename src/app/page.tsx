@@ -42,7 +42,7 @@ function toConvexProps(
 }
 
 function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
-  const mass = 0.01;
+  const mass = 0.001;
   const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
   const args = useMemo(() => toConvexProps(geometry), [geometry]);
   const [ref, api] = useConvexPolyhedron(
