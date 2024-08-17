@@ -41,12 +41,7 @@ function toConvexProps(
   return [vertices, faces];
 }
 
-function D20({
-  position,
-  rotation,
-  motionData,
-  ...rest
-}: Partial<ConvexPolyhedronProps> & { motionData: MotionData }) {
+function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
   const mass = 1;
   const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
   const args = useMemo(() => toConvexProps(geometry), [geometry]);
@@ -75,17 +70,6 @@ function D20({
       (Math.random() - 0.5) * 10,
     );
   }, [api]);
-
-  // useEffect(() => {
-  //   if (!position) return;
-  //   const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 2);
-  //   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 2);
-  //   const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 2);
-  //   const forceX = mass * accX;
-  //   const forceY = mass * accY;
-  //   const forceZ = mass * accZ;
-  //   api.applyLocalForce([forceX, forceZ, -forceY], [0, 0, 0]);
-  // }, [api, mass, position, motionData]);
 
   return (
     <Icosahedron
