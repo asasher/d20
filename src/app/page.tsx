@@ -76,16 +76,16 @@ function D20({
     );
   }, [api]);
 
-  useEffect(() => {
-    if (!position) return;
-    const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 2);
-    const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 2);
-    const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 2);
-    const forceX = mass * accX;
-    const forceY = mass * accY;
-    const forceZ = mass * accZ;
-    api.applyLocalForce([forceX, forceZ, -forceY], position);
-  }, [api, mass, position, motionData]);
+  // useEffect(() => {
+  //   if (!position) return;
+  //   const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 2);
+  //   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 2);
+  //   const accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 2);
+  //   const forceX = mass * accX;
+  //   const forceY = mass * accY;
+  //   const forceZ = mass * accZ;
+  //   api.applyLocalForce([forceX, forceZ, -forceY], [0, 0, 0]);
+  // }, [api, mass, position, motionData]);
 
   return (
     <Icosahedron
@@ -157,6 +157,14 @@ function Lights() {
 
 export default function Page() {
   const { requestPermission, motionData } = useDeviceMotion();
+
+  const accX = toFixed(motionData.accelerationIncludingGravity.x ?? 0, 2);
+  const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 2);
+  let accZ = toFixed(motionData.accelerationIncludingGravity.z ?? 0, 2);
+  if (accZ <= 0) {
+    accZ = 9.81;
+  }
+
   return (
     <>
       <Canvas
@@ -168,7 +176,7 @@ export default function Page() {
         <color attach="background" args={["lightblue"]} />
         <OrbitControls />
         <Lights />
-        <Physics>
+        <Physics gravity={[accX, -accZ, accY]}>
           <Bounds fit clip observe margin={1}>
             <Plane
               position={[0, -4.5, 0]}
@@ -195,7 +203,7 @@ export default function Page() {
               args={[9, 10, 1]}
               rotation={[0, Math.PI, 0]}
             />
-            <D20 position={[0, 10, 0]} motionData={motionData} />
+            <D20 position={[0, 10, 0]} />
           </Bounds>
         </Physics>
       </Canvas>
