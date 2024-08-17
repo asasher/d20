@@ -8,15 +8,9 @@ import {
   type Triplet,
   type BoxProps,
   useBox,
+  Debug,
 } from "@react-three/cannon";
-import {
-  Text,
-  Icosahedron,
-  OrbitControls,
-  Bounds,
-  Box,
-  useBounds,
-} from "@react-three/drei";
+import { Text, OrbitControls, Bounds, Box } from "@react-three/drei";
 import {
   type BufferGeometry,
   Euler,
@@ -27,7 +21,7 @@ import {
 } from "three";
 import { Geometry } from "three-stdlib";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import useDeviceMotion, { MotionData } from "~/lib/use-device-motion";
+import useDeviceMotion from "~/lib/use-device-motion";
 import { Button } from "~/components/ui/button";
 import { toFixed } from "~/lib/utils";
 
@@ -41,41 +35,50 @@ function toConvexProps(
   return [vertices, faces];
 }
 
-function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
+function D20({
+  position,
+  rotation,
+  radius,
+  ...rest
+}: Partial<ConvexPolyhedronProps> & { radius: number }) {
   const mass = 0.001;
-  const geometry = useMemo(() => new IcosahedronGeometry(1, 0), []);
+  const geometry = useMemo(() => new IcosahedronGeometry(radius, 0), [radius]);
   const args = useMemo(() => toConvexProps(geometry), [geometry]);
   const [ref, api] = useConvexPolyhedron(
     () => ({ args, mass, position, rotation, ...rest }),
     useRef<Mesh>(null),
   );
 
+  const rv = 30;
+  const jv = 10;
+  const jvMin = 10;
   const rollDice = useCallback(() => {
     api.velocity.set(
-      (Math.random() - 0.5) * 10,
-      Math.random() * 5 + 3,
-      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * jv,
+      (Math.random() - 0.5) * jv,
+      Math.random() * jv + jvMin,
     );
     api.angularVelocity.set(
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * rv,
+      (Math.random() - 0.5) * rv,
+      (Math.random() - 0.5) * rv,
     );
   }, [api]);
 
   useEffect(() => {
     api.angularVelocity.set(
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * rv,
+      (Math.random() - 0.5) * rv,
+      (Math.random() - 0.5) * rv,
     );
   }, [api]);
 
   return (
-    <Icosahedron
+    <mesh
       onClick={rollDice}
       receiveShadow
       castShadow
+      // args={[radius, 0]}
       {...{ geometry, position, ref, rotation }}
     >
       <meshStandardMaterial color="orange" />
@@ -101,7 +104,7 @@ function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
           <Text
             key={index}
             position={position}
-            fontSize={0.3}
+            fontSize={radius * 0.25}
             color="white"
             anchorX="center"
             anchorY="middle"
@@ -112,11 +115,11 @@ function D20({ position, rotation, ...rest }: Partial<ConvexPolyhedronProps>) {
           </Text>
         );
       })}
-    </Icosahedron>
+    </mesh>
   );
 }
 
-function Plane({ position, rotation, args, ...rest }: Partial<BoxProps>) {
+function Side({ position, rotation, args, ...rest }: Partial<BoxProps>) {
   const [ref] = useBox<Mesh>(() => ({
     position,
     rotation,
@@ -126,6 +129,7 @@ function Plane({ position, rotation, args, ...rest }: Partial<BoxProps>) {
   return (
     <Box receiveShadow {...{ position, ref, rotation, args }}>
       <shadowMaterial color={"#171717"} opacity={0.4} />
+      {/* <meshStandardMaterial color="red" /> */}
     </Box>
   );
 }
@@ -134,7 +138,54 @@ function Lights() {
   return (
     <>
       <ambientLight />
-      <directionalLight position={[0, 5, 0]} castShadow />
+      <directionalLight position={[0, 0, 5]} castShadow />
+    </>
+  );
+}
+
+function Tray({ w, h, d }: { w: number; h: number; d: number }) {
+  const wallThickness = 0.1;
+  const measurements: {
+    position: Triplet;
+    rotation: Triplet;
+    args: Triplet;
+  }[] = [
+    {
+      position: [0, 0, -(d / 2)],
+      rotation: [0, 0, 0],
+      args: [w, h, wallThickness],
+    }, // Bottom
+    // {
+    //   position: [0, 0, d / 2],
+    //   rotation: [0, 0, 0],
+    //   args: [w, h, wallThickness],
+    // }, // Top
+    {
+      position: [-(w / 2), 0, 0],
+      rotation: [0, Math.PI / 2, 0],
+      args: [d, h, wallThickness],
+    }, // Left
+    {
+      position: [w / 2, 0, 0],
+      rotation: [0, Math.PI / 2, 0],
+      args: [d, h, wallThickness],
+    }, // Right
+    {
+      position: [0, -(h / 2), 0],
+      rotation: [Math.PI / 2, 0, 0],
+      args: [w, d, wallThickness],
+    }, // Up
+    {
+      position: [0, h / 2, 0],
+      rotation: [Math.PI / 2, 0, 0],
+      args: [w, d, wallThickness],
+    }, // Down
+  ];
+  return (
+    <>
+      {measurements.map(({ position, rotation, args }) => (
+        <Side position={position} rotation={rotation} args={args} />
+      ))}
     </>
   );
 }
@@ -149,46 +200,28 @@ export default function Page() {
     accZ = 9.81;
   }
 
+  const mult = 3;
+  const gravity: [number, number, number] = [
+    mult * accX,
+    -mult * accY,
+    -mult * accZ,
+  ];
+
+  console.log(gravity);
+
   return (
     <>
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        gl={{ alpha: false }}
-        camera={{ position: [0, 10, 0], fov: 10 }}
-      >
+      <Canvas shadows camera={{ position: [0, 0, 2], fov: 20 }}>
         <color attach="background" args={["lightblue"]} />
         <OrbitControls />
         <Lights />
-        <Physics gravity={[accX, -accZ, -accY]}>
-          <Bounds fit clip observe margin={1}>
-            <Plane
-              position={[0, -4.5, 0]}
-              args={[9, 16, 1]}
-              rotation={[-Math.PI / 2, 0, 0]}
-            />
-            <Plane
-              position={[-4.5, 0, 0]}
-              args={[16, 10, 1]}
-              rotation={[0, Math.PI / 2, 0]}
-            />
-            <Plane
-              position={[4.5, 0, 0]}
-              args={[16, 10, 1]}
-              rotation={[0, -Math.PI / 2, 0]}
-            />
-            <Plane
-              position={[0, 0, -8]}
-              args={[9, 10, 1]}
-              rotation={[0, 0, 0]}
-            />
-            <Plane
-              position={[0, 0, 8]}
-              args={[9, 10, 1]}
-              rotation={[0, Math.PI, 0]}
-            />
-            <D20 position={[0, 10, 0]} />
+        <Physics gravity={gravity}>
+          {/* <Debug scale={1.1}> */}
+          <Bounds fit clip observe margin={0.5}>
+            <Tray w={9} h={16} d={10} />
+            <D20 radius={1} position={[0, 0, 0]} />
           </Bounds>
+          {/* </Debug> */}
         </Physics>
       </Canvas>
       <div className="absolute left-2 top-2">
