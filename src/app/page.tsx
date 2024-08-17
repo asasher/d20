@@ -209,7 +209,7 @@ export default function Page() {
   const mult = 10;
   const gravity: [number, number, number] = [
     mult * accX,
-    -mult * accY,
+    mult * accY,
     -mult * accZ,
   ];
 
