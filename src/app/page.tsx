@@ -217,7 +217,6 @@ export default function Page() {
       <Canvas onClick={requestPermission} shadows>
         <color attach="background" args={["lightblue"]} />
         <OrthographicCamera makeDefault zoom={100} position={[0, 0, d]} />
-        <OrbitControls />
         <ambientLight castShadow />
         <directionalLight position={[0, h / 2, d]} castShadow>
           <orthographicCamera
