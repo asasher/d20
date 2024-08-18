@@ -201,7 +201,7 @@ export default function Page() {
   const accY = toFixed(motionData.accelerationIncludingGravity.y ?? 0, 3) * 20;
   const accZ = toFixed(
     (motionData.acceleration.z ?? 0) <= 0
-      ? -9.81
+      ? -9.81 * 20
       : (motionData.acceleration.z ?? 0) * -10,
     3,
   );
