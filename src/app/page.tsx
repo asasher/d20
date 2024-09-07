@@ -8,15 +8,8 @@ import {
   type Triplet,
   type BoxProps,
   useBox,
-  Debug,
 } from "@react-three/cannon";
-import {
-  Text,
-  OrbitControls,
-  Bounds,
-  Box,
-  OrthographicCamera,
-} from "@react-three/drei";
+import { Text, Bounds, Box, OrthographicCamera } from "@react-three/drei";
 import {
   type BufferGeometry,
   Euler,
@@ -28,7 +21,6 @@ import {
 import { Geometry } from "three-stdlib";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import useDeviceMotion from "~/lib/use-device-motion";
-import { Button } from "~/components/ui/button";
 import { toFixed } from "~/lib/utils";
 import useAspectRatio from "~/lib/use-aspect-ratio";
 
