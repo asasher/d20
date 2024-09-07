@@ -1,5 +1,7 @@
 import { useRef, useCallback, useEffect, useState } from "react";
 
+// Based on https://danburzo.ro/dom-gestures/
+
 // Types
 type Point = { x: number; y: number };
 type Gesture = {
